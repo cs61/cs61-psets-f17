@@ -241,7 +241,6 @@ if (@ARGV > 0 && -f $ARGV[0]) {
         ++$ntest;
         printf STDERR "test%03d ", $i;
         $out = run_sh61(sprintf("./test%03d", $i), "stdout" => "pipe", "stdin" => "/dev/null", "time_limit" => 5, "size_limit" => 1000);
-        printf STDERR $out->{error}, "\n", $out->{output}, "\n\n";
         if (exists($out->{error})) {
             print STDERR "${Red}CRASH: $out->{error}$Off\n";
             if ($out->{output} =~ m/\A\s*(.+)/) {
