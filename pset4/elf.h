@@ -15,7 +15,7 @@ typedef struct elf_header {
     uint16_t e_type;        // @0x10
     uint16_t e_machine;
     uint32_t e_version;
-    uintptr_t e_entry;      // @0x18 entry point: address of first instruction
+    uint64_t e_entry;       // @0x18 entry point: address of first instruction
     uint64_t e_phoff;       // @0x20 offset from elf_header to 1st elf_program
     uint64_t e_shoff;       // @0x28 offset from elf_header to 1st elf_section
     uint32_t e_flags;
@@ -30,7 +30,7 @@ typedef struct elf_header {
 // program header (required by the loader)
 typedef struct elf_program {
     uint32_t p_type;        // @0x00 see ELF_PTYPE below
-    uint32_t p_flags;       // @0x04
+    uint32_t p_flags;       // @0x04 see ELF_PFLAG below
     uint64_t p_offset;      // @0x08 offset from elf_header to program data
     uint64_t p_va;          // @0x10 virtual address to load data
     uint64_t p_pa;          // @0x18 not used
@@ -43,20 +43,20 @@ typedef struct elf_program {
 typedef struct elf_section {
     uint32_t s_name;
     uint32_t s_type;
-    uint32_t s_flags;
-    uint32_t s_addr;
-    uint32_t s_offset;
-    uint32_t s_size;
+    uint64_t s_flags;
+    uint64_t s_addr;
+    uint64_t s_offset;
+    uint64_t s_size;
     uint32_t s_link;
     uint32_t s_info;
-    uint32_t s_addralign;
-    uint32_t s_entsize;
+    uint64_t s_addralign;
+    uint64_t s_entsize;
 } elf_section;
 
-// Values for elf_prog::p_type
+// Values for elf_program::p_type
 #define ELF_PTYPE_LOAD          1
 
-// Flag bits for elf_prog::p_flags
+// Flag bits for elf_program::p_flags
 #define ELF_PFLAG_EXEC          1
 #define ELF_PFLAG_WRITE         2
 #define ELF_PFLAG_READ          4
