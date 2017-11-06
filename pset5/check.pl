@@ -79,13 +79,8 @@ sub CMD_MAX_TIME ()       { "CMD_MAX_TIME" }
       CMD_INIT => 'echo Still here > f%%a.txt; echo > f%%b.txt',
       CMD_CLEANUP => 'rm f%%b.txt && sleep 0.3 && cat f%%a.txt' ],
 
-    [ 'Test BG3',
-      'sleep 0.2 | wc -c | sed s/0/Second/ & sleep 0.1 | wc -c | sed s/0/First/',
-      'First Second',
-      CMD_CLEANUP => 'sleep 0.25'],
-
     # Check that background commands are run in the background
-    [ 'Test BG4',
+    [ 'Test BG3',
       'sleep 2 &',
       '1',
       CMD_INIT => '',
@@ -283,6 +278,11 @@ sub CMD_MAX_TIME ()       { "CMD_MAX_TIME" }
     [ 'Test PIPE22',
       'false && echo unexpected && echo vnexpected | tr v u ; echo expected',
       'expected' ],
+
+    [ 'Test PIPE23', # actually a background test
+      'sleep 0.2 | wc -c | sed s/0/Second/ & sleep 0.1 | wc -c | sed s/0/First/',
+      'First Second',
+      CMD_CLEANUP => 'sleep 0.25'],
 
 
 # Zombies
