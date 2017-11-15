@@ -731,6 +731,16 @@ sub run (@) {
         $prefix = "  ";
     }
     $result = `cat out/$outfile`;
+    # sanitization errors
+    my($sanitizer) = "";
+    if ($result =~ /\A([\s\S]*?)^(\S+\.c:\d+:(?:\d+:)? runtime error[\s\S]+)\z/m) {
+        $result = $1;
+        $sanitizer .= $2;
+    }
+    if ($result =~ /\A([\s\S]*?)^(===+\s+==\d+==[\s\S]*)\z/m) {
+        $result = $1;
+        $sanitizer .= $2;
+    }
     $result =~ s%^sh61[\[\]\d]*\$ %%;
     $result =~ s%sh61[\[\]\d]*\$ $%%;
     $result =~ s%^\[\d+\]\s+\d+$%%mg;
@@ -764,6 +774,13 @@ sub run (@) {
         }
         $ntestfailed += 1 if $ok;
     }
+    if ($sanitizer ne "") {
+        chomp $sanitizer;
+        $sanitizer = substr($sanitizer, 0, 400) . "..."
+            if length($sanitizer) > 400;
+        $sanitizer =~ s/\n/\n      /g;
+        print OUT "    ${Redctx}sanitizer reports errors:${Off}\n      $sanitizer\n";
+    }
 
     if (exists($opts{CMD_CAT})) {
         print OUT "\n${Green}", $opts{CMD_CAT}, "\n==================${Off}\n";
@@ -778,6 +795,25 @@ sub run (@) {
 }
 
 open(OUT, ">&STDOUT");
+my($leak_check) = 0;
+
+while (@ARGV && $ARGV[0] =~ /^-/) {
+    if ($ARGV[0] eq "--leak" || $ARGV[0] eq "--leak-check") {
+        $leak_check = 1;
+        shift @ARGV;
+        next;
+    } elsif ($ARGV[0] eq "--only") {
+        @ARGV = ($ARGV[1]);
+        last;
+    }
+
+    print STDERR "Usage: check.pl TESTNUM...\n";
+    exit(1);
+}
+
+if (!$leak_check && !$ENV{"ASAN_OPTIONS"}) {
+    $ENV{"ASAN_OPTIONS"} = "detect_leaks=0";
+}
 
 foreach my $allowed_tests (@ARGV) {
     while ($allowed_tests =~ m{(?:^|[\s,])(\w+?)-?(\d*)((?:-\d*)?)(?=[\s,]|$)}g) {
